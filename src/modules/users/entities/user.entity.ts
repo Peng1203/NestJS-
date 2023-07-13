@@ -1,5 +1,5 @@
 import { formatDate } from '@/utils/date.util';
-import { Transform } from 'class-transformer';
+import { DateTimeTransformer } from '@/utils/dateTimeTransformer';
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity({ name: 'users' })
@@ -14,9 +14,7 @@ export class User {
     name: 'create_time',
     type: 'datetime',
     default: formatDate(),
-  })
-  @Transform((val) => {
-    console.log('val ----->', val);
+    transformer: new DateTimeTransformer(),
   })
   readonly createTime: Date | string;
 }

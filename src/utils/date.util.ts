@@ -4,3 +4,7 @@ export function formatDate(data?: number | string | Date): string {
   if (data) day(data).format('YYYY-MM-DD HH:mm:ss');
   else return day().format('YYYY-MM-DD HH:mm:ss');
 }
+
+const a = formatDate();
+
+console.log('a ----->', a);
