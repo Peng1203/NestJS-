@@ -6,6 +6,9 @@ const { NODE_ENV, HOST, PORT, PREFIX } = process.env;
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {});
+  // 开启跨域
+  app.enableCors();
+  // 接口预设 路径
   app.setGlobalPrefix(PREFIX);
   // 注册全局响应拦截器
   app.useGlobalInterceptors(new GlobalResponseInterceptor());
