@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { TypeORMConfig } from './config/mysql.config';
 import { UserModule } from './modules/users/user.module';
+// import { APP_INTERCEPTOR } from '@nestjs/core';
+// import { GlobalResponseInterceptor } from './common/interceptor/global-response.interceptor';
 
 @Module({
   imports: [
@@ -15,32 +16,24 @@ import { UserModule } from './modules/users/user.module';
       isGlobal: true,
       cache: true,
     }),
-    // 导入TypeORM
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: process.env.HOST,
-      port: Number(process.env.DB_PORT),
-      username:
-        process.env.NODE_ENV === 'development'
-          ? process.env.DB_USER_NAME_DEV
-          : process.env.DB_USER_NAME_PROD,
-      password:
-        process.env.NODE_ENV === 'development'
-          ? process.env.DB_PASSWORD_DEV
-          : process.env.DB_PASSWORD_PROD,
-      database: process.env.DB_NAME,
-      // 设置时区
-      timezone: '+08:00',
-      // entities: [User],
-      // entities: ['./dist/**/*.entity{.ts,.js}'],
-      // entities: [__dirname + '/**/*.entity{.ts,.js}'], // 指定实体文件
-      autoLoadEntities: true, // 自动加载实体文件
-      synchronize: process.env.NODE_ENV === 'development' ? true : false, // 自动同步 生产环境不建议使用
+    // 异步加载的方式 导入TypeORM 配置
+    TypeOrmModule.forRootAsync({
+      useFactory: async (): Promise<TypeOrmModuleOptions> =>
+        await import('./config/mysql.config').then(
+          ({ TypeORMConfig }) => TypeORMConfig,
+        ),
     }),
     UserModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    // 注册全局 响应拦截器
+    // {
+    //   provide: APP_INTERCEPTOR,
+    //   useClass: GlobalResponseInterceptor,
+    // },
+  ],
 })
 export class AppModule {
   constructor(private dataSource: DataSource) {}
