@@ -6,18 +6,25 @@ import {
   Patch,
   Param,
   Delete,
+  Res,
+  Put,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-
+import type { Response } from 'express';
+import { MsgEnums } from '@/helper/enums';
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  findAll() {
-    return this.userService.findAll();
+  public async findAll(@Res({ passthrough: true }) res: Response) {
+    // res.status(400);
+    res.resMsg = MsgEnums.TRUE;
+    const [list, total] = await this.userService.findAll();
+    return { list, total };
   }
 
   @Post()
@@ -39,5 +46,13 @@ export class UserController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.userService.remove(+id);
+  }
+
+  @Put(':id')
+  updateUser(
+    @Res({ passthrough: false }) res: Response,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    res.send('修改成功!!!');
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -12,9 +12,11 @@ export class UserService {
   ) {}
 
   async findAll() {
-    const data = await this.userRepository.find();
-    // console.log('data ----->', data);
-    return data;
+    try {
+      return await this.userRepository.findAndCount();
+    } catch (e) {
+      throw new InternalServerErrorException(e.message);
+    }
   }
 
   findOne(id: number) {
@@ -22,11 +24,17 @@ export class UserService {
   }
 
   async create(createUserDto: CreateUserDto) {
-    const user = this.userRepository.create(createUserDto);
-    console.log('addResult ----->', user);
-    const addRes = await this.userRepository.save(user);
-    console.log('addRes ----->', addRes);
-    return 'This action adds a new user';
+    try {
+      const user = this.userRepository.create(createUserDto);
+      const addRes = await this.userRepository.save(user);
+      console.log('addRes ----->', addRes);
+      return 'This action adds a new user';
+    } catch (e) {
+      console.log('e ----->', e);
+      console.log('e ----->', e.QueryFailedError, e.name);
+      console.log('e ----->', e.code);
+      throw new InternalServerErrorException(e.message, '123');
+    }
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
