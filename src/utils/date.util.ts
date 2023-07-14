@@ -6,5 +6,3 @@ export function formatDate(data?: number | string | Date): string {
 }
 
 const a = formatDate();
-
-console.log('a ----->', a);
