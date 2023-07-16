@@ -9,21 +9,29 @@ import {
   Res,
   Put,
   ParseIntPipe,
+  UsePipes,
+  Query,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import type { Response } from 'express';
-import { MsgEnums } from '@/helper/enums';
+import { ResponseMsgEnum } from '@/helper/enums';
+import { DtoValidatePipe } from '@/common/pipe/dto-validate-pipe';
+import { FindUserDto } from './dto/find-user-dto';
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  public async findAll(@Res({ passthrough: true }) res: Response) {
+  @UsePipes(DtoValidatePipe)
+  public async findAll(
+    @Res({ passthrough: true }) res: Response,
+    @Query() query: FindUserDto,
+  ) {
     // res.status(400);
-    res.resMsg = MsgEnums.TRUE;
-    const [list, total] = await this.userService.findAll();
+    res.resMsg = ResponseMsgEnum.TRUE;
+    const [list, total] = await this.userService.findAll(query);
     return { list, total };
   }
 

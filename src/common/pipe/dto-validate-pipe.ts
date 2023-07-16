@@ -1,0 +1,52 @@
+import {
+  ArgumentMetadata,
+  BadRequestException,
+  Injectable,
+  PipeTransform,
+} from '@nestjs/common';
+import { validate } from 'class-validator';
+import { plainToClass } from 'class-transformer';
+
+// 转换参数列表
+const convertProps: string[] = ['page', 'pageSize', 'roleId'];
+
+const options = {
+  whitelist: true,
+  forbidNonWhitelisted: true,
+};
+
+@Injectable()
+export class DtoValidatePipe implements PipeTransform {
+  async transform(value: any, metadata: ArgumentMetadata) {
+    // 转换部分query参数
+    const { type, metatype } = metadata;
+
+    // 当触发 params 校验直接跳过 或 没有传递Dto校验数据直接返回
+    if (type === 'param' || !metatype) return value;
+    else if (type === 'query') {
+      // 当为query查询时 转换部分字段的 数据类型
+      for (const key in value) {
+        if (convertProps.indexOf(key) >= 0) value[key] = Number(value[key]);
+      }
+    }
+    const errors = await validate(plainToClass(metatype, value), options);
+    if (errors.length > 0) {
+      const errorMessage = this.flattenErrors(errors);
+      throw new BadRequestException(errorMessage);
+    }
+
+    return value;
+  }
+
+  private flattenErrors(errors: any[]): string {
+    return errors
+      .map((error) => {
+        for (const property in error.constraints) {
+          if (error.constraints.hasOwnProperty(property)) {
+            return error.constraints[property];
+          }
+        }
+      })
+      .join(', ');
+  }
+}

@@ -1,31 +1,28 @@
+import { User } from '@/modules/users/entities/user.entity';
 import { DateTimeTransformer } from '@/utils/dateTimeTransformer';
 import {
-  Entity,
   Column,
-  Index,
-  Unique,
   CreateDateColumn,
-  UpdateDateColumn,
+  Entity,
+  Index,
+  OneToMany,
   PrimaryGeneratedColumn,
-  OneToOne,
-  JoinColumn,
-  ManyToOne,
+  Unique,
+  UpdateDateColumn,
 } from 'typeorm';
-import { Role } from '@/modules/roles/entities/role.entity';
 
-@Entity({ name: 'user' })
-@Unique(['userName'])
-export class User {
+@Entity({ name: 'role' })
+@Unique(['roleName'])
+export class Role {
   @PrimaryGeneratedColumn()
   readonly id: number;
 
-  @Index('index_user_name')
-  @Column({ name: 'user_name', type: 'varchar', length: 255 })
-  readonly userName: string;
+  @Index('index_role_name')
+  @Column({ name: 'role_name' })
+  readonly roleName: string;
 
-  @ManyToOne(() => Role, (role) => role.id)
-  @JoinColumn()
-  role: Role;
+  @OneToMany(() => User, (user) => user.role)
+  readonly users: User[];
 
   @CreateDateColumn({
     name: 'create_time',

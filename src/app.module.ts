@@ -4,7 +4,8 @@ import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { UserModule } from './modules/users/user.module';
+import { UsersModule } from './modules/users/user.module';
+import { RolesModule } from './modules/roles/roles.module';
 // import { APP_INTERCEPTOR } from '@nestjs/core';
 // import { GlobalResponseInterceptor } from './common/interceptor/global-response.interceptor';
 
@@ -23,7 +24,8 @@ import { UserModule } from './modules/users/user.module';
           ({ TypeORMConfig }) => TypeORMConfig,
         ),
     }),
-    UserModule,
+    UsersModule,
+    RolesModule,
   ],
   controllers: [AppController],
   providers: [

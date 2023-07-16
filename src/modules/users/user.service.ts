@@ -3,7 +3,8 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
+import { FindUserDto } from './dto/find-user-dto';
 
 @Injectable()
 export class UserService {
@@ -11,9 +12,19 @@ export class UserService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
   ) {}
 
-  async findAll() {
+  async findAll(params: FindUserDto) {
     try {
-      return await this.userRepository.findAndCount();
+      const { queryStr, page, pageSize, column, order } = params;
+      return await this.userRepository.findAndCount({
+        where: {
+          userName: Like(`%${queryStr}%`),
+        },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        order: { [column || 'id']: order || 'ASC' },
+        // 关联查询
+        relations: ['role'],
+      });
     } catch (e) {
       throw new InternalServerErrorException(e.message);
     }
