@@ -17,8 +17,9 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import type { Response } from 'express';
 import { ResponseMsgEnum } from '@/helper/enums';
-import { DtoValidatePipe } from '@/common/pipe/dto-validate-pipe';
+import { DtoValidatePipe } from '@/common/pipe/dto-validate/dto-validate-pipe';
 import { FindUserDto } from './dto/find-user-dto';
+import { IdsDto } from '@/common/dto';
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -29,15 +30,13 @@ export class UserController {
     @Res({ passthrough: true }) res: Response,
     @Query() query: FindUserDto,
   ) {
-    // res.status(400);
     res.resMsg = ResponseMsgEnum.TRUE;
     const [list, total] = await this.userService.findAll(query);
     return { list, total };
   }
 
   @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    console.log(' ----->', createUserDto);
+  async create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
   }
 
@@ -52,8 +51,20 @@ export class UserController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
+  async remove(
+    @Param('id', ParseIntPipe) id: number,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const delRes = await this.userService.remove(id);
+    res.resMsg = delRes ? ResponseMsgEnum.TRUE : ResponseMsgEnum.FALSE;
+    return delRes ? '删除用户成功' : '删除用户失败';
+  }
+
+  @Delete()
+  // @UsePipes(DtoValidatePipe)
+  async batch(@Body() params: IdsDto) {
+    console.log('params ----->', params.ids);
+    return '批量删除用户';
   }
 
   @Put(':id')

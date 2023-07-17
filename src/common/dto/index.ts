@@ -1,4 +1,6 @@
 import {
+  ArrayMinSize,
+  IsArray,
   IsDefined,
   IsIn,
   IsInt,
@@ -34,4 +36,11 @@ export class ListCommonDto {
   @IsIn(['ASC', 'DESC', ''])
   @IsDefined()
   readonly order: 'ASC' | 'DESC' | '';
+}
+
+export class IdsDto {
+  @IsArray()
+  @ArrayMinSize(1, { message: '至少包含一个ID' })
+  @IsInt({ each: true, message: '每个ID必须为整数' })
+  readonly ids: number[];
 }

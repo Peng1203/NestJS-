@@ -1,4 +1,9 @@
-import { Module } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
@@ -8,6 +13,7 @@ import { UsersModule } from './modules/users/user.module';
 import { RolesModule } from './modules/roles/roles.module';
 // import { APP_INTERCEPTOR } from '@nestjs/core';
 // import { GlobalResponseInterceptor } from './common/interceptor/global-response.interceptor';
+import LoggerMiddleware from './common/middleware/logger/logger.middleware';
 
 @Module({
   imports: [
@@ -20,7 +26,7 @@ import { RolesModule } from './modules/roles/roles.module';
     // 异步加载的方式 导入TypeORM 配置
     TypeOrmModule.forRootAsync({
       useFactory: async (): Promise<TypeOrmModuleOptions> =>
-        await import('./config/mysql.config').then(
+        await import('./config/typeORM.config').then(
           ({ TypeORMConfig }) => TypeORMConfig,
         ),
     }),
@@ -37,6 +43,11 @@ import { RolesModule } from './modules/roles/roles.module';
     // },
   ],
 })
-export class AppModule {
+export class AppModule implements NestModule {
   constructor(private dataSource: DataSource) {}
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(LoggerMiddleware)
+      .forRoutes({ path: '*', method: RequestMethod.ALL });
+  }
 }
