@@ -9,34 +9,39 @@ import {
   Res,
   Put,
   ParseIntPipe,
-  UsePipes,
   Query,
+  NotFoundException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import type { Response } from 'express';
 import { ResponseMsgEnum } from '@/helper/enums';
-import { DtoValidatePipe } from '@/common/pipe/dto-validate/dto-validate-pipe';
 import { FindUserDto } from './dto/find-user-dto';
 import { IdsDto } from '@/common/dto';
+import { RolesService } from '../roles/roles.service';
 @Controller('users')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly rolesService: RolesService,
+  ) {}
 
   @Get()
-  @UsePipes(DtoValidatePipe)
   public async findAll(
     @Res({ passthrough: true }) res: Response,
     @Query() query: FindUserDto,
   ) {
     res.resMsg = ResponseMsgEnum.TRUE;
-    const [list, total] = await this.userService.findAll(query);
+    const { list, total } = await this.userService.findAll(query);
     return { list, total };
   }
 
   @Post()
   async create(@Body() createUserDto: CreateUserDto) {
+    const isExist = await this.rolesService.roleIsExist(createUserDto.role);
+    if (!isExist) throw new NotFoundException('选择的角色无效：角色不存在。');
+
     return this.userService.create(createUserDto);
   }
 
@@ -46,14 +51,23 @@ export class UserController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  update(@Param('id', ParseIntPipe) id: number, @Body() updateUserDto) {
+    return this.userService.update(+id, updateUserDto);
+  }
+
+  @Put(':id')
+  updateUser(
+    @Res({ passthrough: false }) res: Response,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
     return this.userService.update(+id, updateUserDto);
   }
 
   @Delete(':id')
   async remove(
-    @Param('id', ParseIntPipe) id: number,
     @Res({ passthrough: true }) res: Response,
+    @Param('id', ParseIntPipe) id: number,
   ) {
     const delRes = await this.userService.remove(id);
     res.resMsg = delRes ? ResponseMsgEnum.TRUE : ResponseMsgEnum.FALSE;
@@ -61,17 +75,12 @@ export class UserController {
   }
 
   @Delete()
-  // @UsePipes(DtoValidatePipe)
-  async batch(@Body() params: IdsDto) {
-    console.log('params ----->', params.ids);
-    return '批量删除用户';
-  }
-
-  @Put(':id')
-  updateUser(
-    @Res({ passthrough: false }) res: Response,
-    @Param('id', ParseIntPipe) id: number,
+  async batchDelete(
+    @Res({ passthrough: true }) res: Response,
+    @Body() { ids }: IdsDto,
   ) {
-    res.send('修改成功!!!');
+    const delRes = await this.userService.remove(ids);
+    res.resMsg = delRes ? ResponseMsgEnum.TRUE : ResponseMsgEnum.FALSE;
+    return delRes ? `成功删除 ${delRes} 用户` : '删除用户失败';
   }
 }

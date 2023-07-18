@@ -6,6 +6,7 @@ import { User } from './entities/user.entity';
 import { Like, Repository } from 'typeorm';
 import { FindUserDto } from './dto/find-user-dto';
 import { ServerError } from '@/common/errors/server-error';
+import { UserData, UserStruct } from './interface';
 
 @Injectable()
 export class UserService {
@@ -13,10 +14,10 @@ export class UserService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
   ) {}
 
-  async findAll(params: FindUserDto) {
+  async findAll(params: FindUserDto): Promise<UserData> {
     try {
       const { queryStr, page, pageSize, column, order } = params;
-      return await this.userRepository.findAndCount({
+      const [list, total] = await this.userRepository.findAndCount({
         where: {
           userName: Like(`%${queryStr}%`),
         },
@@ -25,7 +26,23 @@ export class UserService {
         order: { [column || 'id']: order || 'ASC' },
         // 关联查询
         relations: ['role'],
+        select: {
+          id: true,
+          userName: true,
+          createTime: true,
+          updateTime: true,
+          role: {
+            id: true,
+            roleName: true,
+          },
+        },
       });
+      const data: UserStruct[] = list.map(({ role, ...user }) => ({
+        ...user,
+        roleId: role.id,
+        roleName: role.roleName,
+      }));
+      return { list: data, total };
     } catch (e) {
       throw new InternalServerErrorException(e.message);
     }
@@ -37,6 +54,8 @@ export class UserService {
 
   async create(createUserDto: CreateUserDto) {
     try {
+      // 创建用户前查询角色id是否正确
+
       const user = this.userRepository.create(createUserDto);
       const addRes = await this.userRepository.save(user);
       return addRes;
@@ -49,7 +68,7 @@ export class UserService {
     return `This action updates a #${id} user`;
   }
 
-  async remove(id: number) {
+  async remove(id: number | number[]) {
     try {
       const delRes = await this.userRepository.delete(id);
       return delRes.affected;
