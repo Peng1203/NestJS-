@@ -13,16 +13,13 @@ import { QueryFailedError } from 'typeorm';
 @Catch(InternalServerErrorException)
 export class DataAccessFilter implements ExceptionFilter {
   catch(exception: HttpException & ServerError, host: ArgumentsHost) {
-    console.log(' exception.name ----->', exception.name);
-    console.log(' exception.message ----->', exception.message);
-    console.log('走了 DataAccessFilter ----->', exception.errCode);
     const ctx = host.switchToHttp();
     const res = ctx.getResponse<Response>();
     const req = ctx.getRequest<Request>();
     const status = exception.getStatus();
-    if (exception instanceof QueryFailedError) {
-      console.log('是是是 ----->');
-    }
+    // if (exception instanceof QueryFailedError) {
+    //   console.log('是是是 ----->');
+    // }
     let reason = '';
     // 当没有传入响应信息是 使用通用错误信息返回
     switch (exception.errCode) {
