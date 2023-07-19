@@ -13,6 +13,7 @@ export class GlobalResponseInterceptor implements NestInterceptor {
     return next.handle().pipe(
       map((data) => {
         const response = context.switchToHttp().getResponse<Response>();
+        response.removeHeader('X-Powered-By');
         return {
           code: response.statusCode,
           message: response.resMsg ?? 'Success',

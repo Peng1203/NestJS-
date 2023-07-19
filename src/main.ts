@@ -4,6 +4,7 @@ import { GlobalResponseInterceptor } from './common/interceptor/global-response/
 import { HttpExceptionFilter } from './common/exceptions/http-exception/http-exception.filter';
 import { DataAccessFilter } from './common/exceptions/data-access/data-access.filter';
 import { DtoValidatePipe } from './common/pipe/dto-validate/dto-validate-pipe';
+import { VersioningType } from '@nestjs/common';
 
 const { NODE_ENV, HOST, PORT, PREFIX } = process.env;
 
@@ -21,6 +22,8 @@ async function bootstrap() {
   app.useGlobalFilters(new DataAccessFilter());
   // 注册全局DTO层校验管道
   app.useGlobalPipes(new DtoValidatePipe());
+
+  process.on('SIGINT', async () => await app.close());
 
   await app.listen(PORT || 3000, () => {
     console.log(

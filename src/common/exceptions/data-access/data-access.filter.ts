@@ -7,12 +7,14 @@ import {
   InternalServerErrorException,
   HttpException,
 } from '@nestjs/common';
-import type { Response } from 'express';
+import type { Request, Response } from 'express';
 import { QueryFailedError } from 'typeorm';
 // 处理 TypeORM 抛出错误
 @Catch(InternalServerErrorException)
 export class DataAccessFilter implements ExceptionFilter {
   catch(exception: HttpException & ServerError, host: ArgumentsHost) {
+    // const [req, res, next]: [Request, Response, Function] = host.getArgs();
+
     const ctx = host.switchToHttp();
     const res = ctx.getResponse<Response>();
     const req = ctx.getRequest<Request>();

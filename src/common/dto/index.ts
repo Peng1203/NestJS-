@@ -8,6 +8,7 @@ import {
   IsNumber,
   IsString,
   Min,
+  IsNumberString,
 } from 'class-validator';
 
 // 列表接口常用参数

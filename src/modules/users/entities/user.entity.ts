@@ -12,6 +12,13 @@ import {
   ManyToOne,
 } from 'typeorm';
 import { Role } from '@/modules/roles/entities/role.entity';
+import { Transform } from 'class-transformer';
+
+// 用户状态枚举
+enum UserStatus {
+  Disabled = 0,
+  Enabled = 1,
+}
 
 @Entity({ name: 'user' })
 @Unique(['userName'])
@@ -25,7 +32,16 @@ export class User {
 
   @ManyToOne(() => Role, (role) => role.id)
   @JoinColumn()
-  role: Role;
+  readonly role: Role;
+
+  @Column({
+    name: 'user_status',
+    type: 'enum',
+    enum: UserStatus,
+    default: UserStatus.Enabled,
+    comment: '0 禁用 1 启用',
+  })
+  readonly userStatus: UserStatus;
 
   @CreateDateColumn({
     name: 'create_time',

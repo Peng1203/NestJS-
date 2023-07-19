@@ -11,15 +11,17 @@ import {
   ParseIntPipe,
   Query,
   NotFoundException,
+  Header,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateUserDto, UpdateUserStatusDto } from './dto/update-user.dto';
 import type { Response } from 'express';
 import { ResponseMsgEnum } from '@/helper/enums';
 import { FindUserDto } from './dto/find-user-dto';
 import { IdsDto } from '@/common/dto';
 import { RolesService } from '../roles/roles.service';
+import { ErrorMsg } from '@/helper/err.message.enums';
 @Controller('users')
 export class UserController {
   constructor(
@@ -28,11 +30,11 @@ export class UserController {
   ) {}
 
   @Get()
+  @Header('Cache-Control', 'max-age=5')
   public async findAll(
     @Res({ passthrough: true }) res: Response,
     @Query() query: FindUserDto,
   ) {
-    res.resMsg = ResponseMsgEnum.TRUE;
     const { list, total } = await this.userService.findAll(query);
     return { list, total };
   }
@@ -40,7 +42,7 @@ export class UserController {
   @Post()
   async create(@Body() createUserDto: CreateUserDto) {
     const isExist = await this.rolesService.roleIsExist(createUserDto.role);
-    if (!isExist) throw new NotFoundException('选择的角色无效：角色不存在。');
+    if (!isExist) throw new NotFoundException(ErrorMsg.RoleNotFound);
 
     return this.userService.create(createUserDto);
   }
@@ -51,17 +53,37 @@ export class UserController {
   }
 
   @Patch(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateUserDto) {
-    return this.userService.update(+id, updateUserDto);
+  async update(
+    @Res({ passthrough: true }) res: Response,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() data: UpdateUserStatusDto,
+  ) {
+    // 判断用是否存在
+    const userIsExist = await this.userService.userIsExist(id);
+    if (!userIsExist) throw new NotFoundException(ErrorMsg.UserNotFound);
+
+    const updateRes = await this.userService.update(id, data);
+    res.resMsg = updateRes ? ResponseMsgEnum.TRUE : ResponseMsgEnum.FALSE;
+    return updateRes ? '更新用户成功' : '更新用户失败';
   }
 
   @Put(':id')
-  updateUser(
-    @Res({ passthrough: false }) res: Response,
+  async updateUser(
+    @Res({ passthrough: true }) res: Response,
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateUserDto: UpdateUserDto,
+    @Body() data: UpdateUserDto,
   ) {
-    return this.userService.update(+id, updateUserDto);
+    // 判断用是否存在
+    const userIsExist = await this.userService.userIsExist(id);
+    if (!userIsExist) throw new NotFoundException(ErrorMsg.UserNotFound);
+    // 判断所选角色是否有效
+    if (data?.role) {
+      const roleIsExist = await this.rolesService.roleIsExist(data.role);
+      if (!roleIsExist) throw new NotFoundException(ErrorMsg.RoleNotFound);
+    }
+    const updateRes = await this.userService.update(id, data);
+    res.resMsg = updateRes ? ResponseMsgEnum.TRUE : ResponseMsgEnum.FALSE;
+    return updateRes ? '更新用户成功' : '更新用户失败';
   }
 
   @Delete(':id')

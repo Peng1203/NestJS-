@@ -1,5 +1,6 @@
 import {
   IsDefined,
+  IsIn,
   IsInt,
   IsNotEmpty,
   IsNumber,
@@ -22,4 +23,9 @@ export class CreateUserDto {
   @IsNotEmpty()
   @IsDefined()
   readonly role: number | any;
+
+  @IsNumber()
+  @IsInt()
+  @IsIn([0, 1])
+  readonly userStatus: number;
 }

@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateUserDto, UpdateUserStatusDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Like, Repository } from 'typeorm';
@@ -26,16 +26,16 @@ export class UserService {
         order: { [column || 'id']: order || 'ASC' },
         // 关联查询
         relations: ['role'],
-        select: {
-          id: true,
-          userName: true,
-          createTime: true,
-          updateTime: true,
-          role: {
-            id: true,
-            roleName: true,
-          },
-        },
+        // select: {
+        //   id: true,
+        //   userName: true,
+        //   createTime: true,
+        //   updateTime: true,
+        //   role: {
+        //     id: true,
+        //     roleName: true,
+        //   },
+        // },
       });
       const data: UserStruct[] = list.map(({ role, ...user }) => ({
         ...user,
@@ -54,8 +54,6 @@ export class UserService {
 
   async create(createUserDto: CreateUserDto) {
     try {
-      // 创建用户前查询角色id是否正确
-
       const user = this.userRepository.create(createUserDto);
       const addRes = await this.userRepository.save(user);
       return addRes;
@@ -64,8 +62,13 @@ export class UserService {
     }
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: number, data: UpdateUserDto | UpdateUserStatusDto) {
+    try {
+      const updateRes = await this.userRepository.update(id, data);
+      return !!updateRes.affected;
+    } catch (e) {
+      throw new ServerError(e.code, '更新用户失败');
+    }
   }
 
   async remove(id: number | number[]) {
@@ -75,5 +78,9 @@ export class UserService {
     } catch (e) {
       throw new ServerError(e.code, '删除用户失败');
     }
+  }
+
+  async userIsExist(id: number): Promise<boolean> {
+    return !!(await this.userRepository.findOne({ where: { id } }));
   }
 }
