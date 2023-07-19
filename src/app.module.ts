@@ -13,10 +13,13 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './modules/users/user.module';
 import { RolesModule } from './modules/roles/roles.module';
+import { JobsModule } from './modules/jobs/jobs.module';
 // import { APP_INTERCEPTOR } from '@nestjs/core';
 // import { GlobalResponseInterceptor } from './common/interceptor/global-response.interceptor';
 import LoggerMiddleware from './common/middleware/logger/logger.middleware';
 import { TypeOrmConfigService } from './config/typeORM.init';
+import { ScheduleModule } from '@nestjs/schedule';
+import { TasksService } from './schedule';
 
 @Module({
   imports: [
@@ -37,12 +40,17 @@ import { TypeOrmConfigService } from './config/typeORM.init';
       /* 使用 useClass 的方法加载配置 */
       useClass: TypeOrmConfigService,
     }),
+    // 注册定时任务
+    ScheduleModule.forRoot(),
     UsersModule,
     RolesModule,
+    JobsModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
+    // 引入定时任务服务类
+    TasksService,
     // 注册全局 响应拦截器
     // {
     //   provide: APP_INTERCEPTOR,
