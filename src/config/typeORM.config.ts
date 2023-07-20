@@ -1,18 +1,21 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 
+const { HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD } = process.env;
+console.log(
+  'TypeORMConfig ----->',
+  HOST,
+  DB_PORT,
+  DB_NAME,
+  DB_USER,
+  DB_PASSWORD,
+);
 export const TypeORMConfig: TypeOrmModuleOptions = {
   type: 'mysql',
-  host: process.env.HOST,
-  port: Number(process.env.DB_PORT),
-  username:
-    process.env.NODE_ENV === 'development'
-      ? process.env.DB_USER_NAME_DEV
-      : process.env.DB_USER_NAME_PROD,
-  password:
-    process.env.NODE_ENV === 'development'
-      ? process.env.DB_PASSWORD_DEV
-      : process.env.DB_PASSWORD_PROD,
-  database: process.env.DB_NAME,
+  host: HOST,
+  port: Number(DB_PORT),
+  username: DB_USER,
+  password: DB_PASSWORD,
+  database: DB_NAME,
   // 设置时区
   timezone: '+08:00',
   retryAttempts: 10, // 最大重连次数

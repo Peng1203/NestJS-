@@ -20,12 +20,18 @@ import LoggerMiddleware from './common/middleware/logger/logger.middleware';
 import { TypeOrmConfigService } from './config/typeORM.init';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TasksService } from './schedule';
+import { BullModule } from '@nestjs/bull';
+import { QueneModule } from './modules/quene/quene.module';
+import { ResourceModule } from './modules/resource/resource.module';
 
 @Module({
   imports: [
     // 导入配置env配置文件
     ConfigModule.forRoot({
-      envFilePath: ['.env'],
+      envFilePath: [
+        '.env',
+        // process.env.NODE_ENV === 'development' ? '.env.dev' : '.env.prod',
+      ],
       isGlobal: true,
       cache: true,
     }),
@@ -45,6 +51,8 @@ import { TasksService } from './schedule';
     UsersModule,
     RolesModule,
     JobsModule,
+    QueneModule,
+    ResourceModule,
   ],
   controllers: [AppController],
   providers: [

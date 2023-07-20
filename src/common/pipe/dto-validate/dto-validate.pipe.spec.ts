@@ -1,4 +1,4 @@
-import { DtoValidatePipe } from './dto-validate-pipe';
+import { DtoValidatePipe } from './dto-validate.pipe';
 
 describe('DtoValidatePipe', () => {
   it('should be defined', () => {

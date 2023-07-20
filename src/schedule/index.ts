@@ -6,7 +6,7 @@ export class TasksService {
   private readonly logger = new Logger(TasksService.name);
   // 每分钟的 45 秒时执行
   // @Cron('45 * * * * *')
-  @Cron(CronExpression.EVERY_10_SECONDS)
+  // @Cron(CronExpression.EVERY_10_SECONDS)
   // handleCron() {
   //   this.logger.debug('Called when the current second is 45');
   // }
@@ -23,8 +23,13 @@ export class TasksService {
     console.log(' 测试 定时任务触发  !!! ----->');
   }
 
-  @Cron('* * * * * *', { name: 'testTask2' })
-  testTask2() {
-    console.log('testTask2 执行了 ----->');
-  }
+  // @Cron('* * * * * *', { name: 'testTask2' })
+  // testTask2() {
+  //   console.log('testTask2 执行了 ----->');
+  // }
+
+  // @Interval('intervalJob', 3000)
+  // intervalTask() {
+  //   console.log(' 间隔定时任务执行! ----->');
+  // }
 }

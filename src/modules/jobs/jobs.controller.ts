@@ -12,7 +12,6 @@ import { JobsService } from './jobs.service';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
 import { SchedulerRegistry } from '@nestjs/schedule';
-
 import { CronJob } from 'cron';
 
 @Controller('jobs')
@@ -40,20 +39,46 @@ export class JobsController {
   }
 
   @Post('add/:name/:seconds')
-  addCronJob(
+  async addCronJob(
     @Param('name') name: string,
     @Param('seconds', ParseIntPipe) seconds: number,
   ) {
-    const job = new CronJob(`${seconds} * * * * *`, () => {
-      console.log('动态创建的定时任务触发了 ----->');
-    });
+    const job = new CronJob(
+      `${seconds} * * * * *`,
+      (e) => {
+        console.log('动态创建的定时任务触发了 ----->', e);
+      },
+      null,
+      true,
+    );
 
     this.schedulerRegistry.addCronJob(name, job);
     job.start();
-
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     return '动态定时任务创建成功!';
   }
 
+  @Get('interval/:name')
+  async getCronJobInterval(@Param('name') name: string) {
+    console.log('name ----->', name);
+    // 没有设置间隔会报错
+    const interval = this.schedulerRegistry.getInterval(name);
+    console.log('inter ----->', interval);
+    return `任务:[${name}], 执行间隔: ${interval._idleTimeout} ms`;
+  }
+
+  @Post('interval/:name/:ms')
+  async setCronJobInterval(
+    @Param('name') name: string,
+    @Param('ms', ParseIntPipe) ms: number,
+  ) {
+    console.log('name ----->', name, ms);
+    const intervalId = setInterval(() => {
+      console.log('动态创建的间隔定时任务 执行!!!!!!!!!!----->');
+    }, ms);
+    this.schedulerRegistry.addInterval(name, intervalId);
+    return `间隔定时任务创建成功 !`;
+  }
   @Post()
   create(@Body() createJobDto: CreateJobDto) {
     return this.jobsService.create(createJobDto);
