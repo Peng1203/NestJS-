@@ -23,6 +23,8 @@ import { TasksService } from './schedule';
 import { BullModule } from '@nestjs/bull';
 import { QueneModule } from './modules/quene/quene.module';
 import { ResourceModule } from './modules/resource/resource.module';
+import { MulterModule } from '@nestjs/platform-express';
+import { MulterConfigService } from './config/multer.config.service';
 
 @Module({
   imports: [
@@ -46,6 +48,16 @@ import { ResourceModule } from './modules/resource/resource.module';
       /* 使用 useClass 的方法加载配置 */
       useClass: TypeOrmConfigService,
     }),
+    // 上传文件配置默认选项
+    MulterModule.register({}),
+    // 异步加载
+    // MulterModule.registerAsync({
+    //   // 工厂函数加载配置
+    //   useFactory: () => ({}),
+    //   // useClass 加载配置
+    //   // useClass: MulterConfigService,
+    // }),
+
     // 注册定时任务
     ScheduleModule.forRoot(),
     UsersModule,

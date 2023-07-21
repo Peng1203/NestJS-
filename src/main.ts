@@ -15,7 +15,7 @@ dotenv.config({
 });
 
 async function bootstrap() {
-  // 异步加载AppModule 等待上面 env 配置文件加载完成
+  // 异步加载AppModule 等待上面 env 配置文件 加载完成
   const { AppModule } = await import('./app.module');
   const app = await NestFactory.create(AppModule, { logger: ['error'] });
 
@@ -31,12 +31,12 @@ async function bootstrap() {
   app.setGlobalPrefix(PREFIX);
   // 注册全局响应拦截器
   app.useGlobalInterceptors(new GlobalResponseInterceptor());
+  // 注册全局异常过滤器
+  app.useGlobalFilters(new AllExceptionFilter(httpAdapter));
   // 注册全局HTTP异常过滤器
   app.useGlobalFilters(new HttpExceptionFilter());
   // 注册DAO层异常过滤器
   app.useGlobalFilters(new DataAccessFilter());
-  // 注册全局异常过滤器
-  app.useGlobalFilters(new AllExceptionFilter(httpAdapter));
   // 注册全局DTO层校验管道
   app.useGlobalPipes(new DtoValidatePipe());
 
