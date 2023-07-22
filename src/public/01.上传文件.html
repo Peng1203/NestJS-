@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>上传文件</title>
+  <script src="../../node_modules/axios/dist/axios.min.js"></script>
+</head>
+
+<body>
+  <input id="upload" type="file" multiple />
+
+  <progress value="0" max="1" id="progress"></progress>
+
+  <button id="upload_btn">上传</button>
+
+  <br>
+
+  <progress value="0" max="1" id="progress_down"></progress>
+
+  <button id="down_btn">下载</button>
+
+  <img src="" alt="" id="down_img">
+
+  <script>
+    const formData = new FormData()
+    const baseURL = 'http://127.0.0.1:3000'
+
+    upload.addEventListener('change', (e) => {
+      console.log('e ----->', e.target.files)
+
+      if (!e.target.files.length) return
+      for (let i = 0; i < e.target.files.length; i++) {
+        formData.append('file', e.target.files[i])
+      }
+    })
+
+
+    upload_btn.addEventListener('click', () => {
+      handleUpload()
+    })
+
+
+    down_btn.addEventListener('click', () => {
+      handleDownload()
+    })
+
+    async function handleUpload() {
+      try {
+        const { data: res } = await axios({
+          url: `${baseURL}/resource/upload/large`,
+          method: 'post',
+          data: formData,
+          // onDownloadProgress
+          // onUploadProgress: function (progressEvent) {
+          //   console.log('progressEvent ----->', progressEvent)
+          // }
+          onUploadProgress(progressEvent) {
+            progress.value = progressEvent.progress
+            console.log('progressEvent ----->', progressEvent)
+          }
+        })
+
+        console.log('res ----->', res)
+      } catch (e) {
+        console.log(e)
+      }
+    }
+
+    async function handleDownload() {
+      try {
+        const fileName = 'enhance-faceai.png'
+        const { data: res, ...resHeaders } = await axios({
+          url: `${baseURL}/resource/download/${fileName}`,
+          method: 'get',
+          // responseType: 'arraybuffer',
+          responseType: 'blob',
+          onDownloadProgress(progressEvent) {
+            progress_down.value = progressEvent.progress
+            console.log('progressEvent ----->', progressEvent)
+          }
+        })
+
+        const blobUrl = URL.createObjectURL(res);
+
+        const a = document.createElement('a');
+
+        a.href = blobUrl
+        a.download = fileName
+
+        a.click()
+
+        URL.revokeObjectURL(blobUrl);
+        document.removeChild(a);
+
+        console.log('图片下载完成！');
+
+      } catch (e) {
+        console.log('e ----->', e)
+      }
+    }
+  </script>
+</body>
+
+</html>

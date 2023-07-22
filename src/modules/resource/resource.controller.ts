@@ -10,11 +10,12 @@ import {
   UploadedFile,
   UploadedFiles,
   BadRequestException,
+  Res,
 } from '@nestjs/common';
 import { ResourceService } from './resource.service';
 import { CreateResourceDto } from './dto/create-resource.dto';
 import { UpdateResourceDto } from './dto/update-resource.dto';
-import { Express } from 'express';
+import { Express, Response } from 'express';
 import {
   AnyFilesInterceptor,
   FileFieldsInterceptor,
@@ -23,6 +24,8 @@ import {
 } from '@nestjs/platform-express';
 import { options } from './filter';
 import { multerOptions } from '@/utils/mluter.options';
+import path from 'path';
+import { ROOT_PATH } from '@/config/resource.config';
 
 @Controller('resource')
 export class ResourceController {
@@ -83,13 +86,22 @@ export class ResourceController {
   // 上传大文件
   @Post('upload/large')
   @UseInterceptors(
-    FileInterceptor('file', multerOptions(250, 1, 'disk', 'video')),
+    FileInterceptor('file', multerOptions(250, 1, 'disk', 'custom')),
   )
   uploadLarge(@UploadedFile() file: Express.Multer.File) {
     console.log('file ----->', file);
     if (!file) throw new BadRequestException('请选择上传文件');
 
     return '上传大文件';
+  }
+
+  @Get('/download/:fileName')
+  downloadFile(@Param('fileName') fileName: string, @Res() res: Response) {
+    console.log('fileName ----->', fileName);
+    const filePath = path.join(ROOT_PATH, fileName);
+    console.log('filePath ----->', filePath);
+    // return `下载文件${filePath}`;
+    res.download(filePath);
   }
 
   @Get()
