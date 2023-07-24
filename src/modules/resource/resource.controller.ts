@@ -11,6 +11,7 @@ import {
   UploadedFiles,
   BadRequestException,
   Res,
+  StreamableFile,
 } from '@nestjs/common';
 import { ResourceService } from './resource.service';
 import { CreateResourceDto } from './dto/create-resource.dto';
@@ -24,8 +25,9 @@ import {
 } from '@nestjs/platform-express';
 import { options } from './filter';
 import { multerOptions } from '@/utils/mluter.options';
-import path from 'path';
+import path, { join } from 'path';
 import { ROOT_PATH } from '@/config/resource.config';
+import { createReadStream } from 'fs';
 
 @Controller('resource')
 export class ResourceController {
@@ -125,5 +127,19 @@ export class ResourceController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.resourceService.remove(+id);
+  }
+
+  @Get('/file/stream')
+  getFile(): StreamableFile {
+    console.log('process.cwd() ----->', process.cwd());
+    const file = createReadStream(join(process.cwd(), 'package.json'));
+    return new StreamableFile(file);
+  }
+
+  @Get('/getHTML/:url')
+  async getHTML(@Param('url') url: string) {
+    console.log('url ----->', url);
+    await this.resourceService.getHTML();
+    return '获取HTML';
   }
 }
