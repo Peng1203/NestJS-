@@ -64,14 +64,14 @@ async function bootstrap() {
 
   // ctrl + c 强制关闭进程时 会触发该通知 便于触发 应用程序关闭的生命周期函数
   // process.on('SIGINT', async () => await app.close());
-  // await app.init();
   // await app.listen(PORT || 3000, () => {
   //   console.log(
   //     `服务运行在: https://${HOST}:${PORT || 3000}${PREFIX} --${NODE_ENV}`,
   //   );
   // });
 
+  await app.init();
   http.createServer(server).listen(3000);
-  https.createServer(httpsOptions, server).listen(443);
+  https.createServer(httpsOptions, server).listen(3010);
 }
 bootstrap();

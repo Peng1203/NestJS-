@@ -25,6 +25,7 @@ import { QueneModule } from './modules/quene/quene.module';
 import { ResourceModule } from './modules/resource/resource.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { MulterConfigService } from './config/multer.config.service';
+import { HttpToHttpsMiddleware } from './common/middleware/http.to.https/http.to.https.middleware';
 
 @Module({
   imports: [
@@ -79,10 +80,10 @@ import { MulterConfigService } from './config/multer.config.service';
   ],
 })
 export class AppModule implements NestModule, OnModuleInit, OnModuleDestroy {
-  constructor(private dataSource: DataSource) {}
+  constructor(private dataSource: DataSource) { }
   configure(consumer: MiddlewareConsumer) {
     consumer
-      .apply(LoggerMiddleware)
+      .apply(LoggerMiddleware, HttpToHttpsMiddleware)
       .forRoutes({ path: '*', method: RequestMethod.ALL });
   }
 
