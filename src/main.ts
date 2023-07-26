@@ -14,6 +14,7 @@ import express from 'express';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import http from 'http';
 import https from 'https';
+import session from 'express-session';
 
 // NODE_ENV 变量 是通过 命令行设置的
 dotenv.config({
@@ -44,6 +45,14 @@ async function bootstrap() {
   const { httpAdapter } = app.get(HttpAdapterHost);
 
   const { NODE_ENV, HOST, PORT, PREFIX } = process.env;
+
+  app.use(
+    session({
+      secret: 'peng1203',
+      resave: false,
+      saveUninitialized: false,
+    }),
+  );
 
   // 开启 gzip 压缩
   app.use(compression());

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>请求HTTPS</title>
+  <script src="../../node_modules/axios/dist/axios.min.js"></script>
+</head>
+
+<body>
+
+  <button id="btn">请求</button>
+
+  <script>
+    btn.addEventListener('click', async () => {
+      const { data: res } = await axios({
+        method: 'get',
+        // url: 'https://127.0.0.1:3001/users?page=1&pageSize=10&column=&queryStr=&roleId=&order='
+        url: 'https://api.peng1203.cn'
+      })
+
+      console.log('res ----->', res)
+
+    })
+  </script>
+</body>
+
+</html>
