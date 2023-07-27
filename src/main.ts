@@ -11,7 +11,7 @@ import { AllExceptionFilter } from './common/exceptions/all-exception/all-except
 import fs from 'fs';
 import path from 'path';
 import express from 'express';
-import { ExpressAdapter } from '@nestjs/platform-express';
+import { ExpressAdapter, NestExpressApplication } from '@nestjs/platform-express';
 import http from 'http';
 import https from 'https';
 import session from 'express-session';
@@ -36,7 +36,7 @@ async function bootstrap() {
   // 异步加载AppModule 等待上面 env 配置文件 加载完成
   const server = express();
   const { AppModule } = await import('./app.module');
-  const app = await NestFactory.create(AppModule, new ExpressAdapter(server));
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, new ExpressAdapter(server));
   // const app = await NestFactory.create(AppModule, {
   //   logger: ['error'],
   //   httpsOptions,
@@ -57,7 +57,10 @@ async function bootstrap() {
   // 开启 gzip 压缩
   app.use(compression());
   // 开启跨域
-  app.enableCors();
+  app.enableCors({
+    origin: 'http://127.0.0.1:5500',
+    credentials: true
+  });
   // 接口预设 路径
   app.setGlobalPrefix(PREFIX);
   // 注册全局响应拦截器

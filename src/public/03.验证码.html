@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>验证码</title>
+  <script src="../../node_modules/axios/dist/axios.min.js"></script>
+</head>
+
+<body>
+
+  <input type="text" name="" id="input" max="4">
+  <span id="container">
+  </span>
+  <button id="btn">校验</button>
+  <!-- <img width="150" height="50" src="" alt="" id="captchaImg"> -->
+
+  <script>
+    const renderCaptcha = async () => {
+      const { data: res } = await axios({
+        method: 'get',
+        url: 'http://127.0.0.1:3000/users/captcha',
+        withCredentials: true
+      })
+      // captchaImg.src = res
+
+      // 获取容器元素
+      var container = document.getElementById("container");
+
+      // 使用innerHTML属性将HTML字符串渲染到容器中
+      container.innerHTML = res;
+
+    }
+    container.addEventListener('click', renderCaptcha)
+    renderCaptcha()
+
+    btn.addEventListener('click', async () => {
+      const { data: res } = await axios({
+        withCredentials: true,
+        method: 'post',
+        url: 'http://127.0.0.1:3000/users/captcha',
+        data: JSON.stringify({
+          code: input.value
+        }),
+        headers: {
+          "content-type": "application/json"
+        }
+      })
+
+      console.log('res ----->', res)
+      if (res.message !== 'Success') return renderCaptcha()
+    })
+  </script>
+</body>
+
+</html>

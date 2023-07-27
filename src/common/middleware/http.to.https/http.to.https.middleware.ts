@@ -4,7 +4,6 @@ import { Request, Response, NextFunction } from 'express';
 @Injectable()
 export class HttpToHttpsMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
-    console.log('req. ----->', req.ip);
 
     next();
     // 判断请求是否通过HTTPS

@@ -12,29 +12,70 @@ import {
   Query,
   NotFoundException,
   Header,
+  Req,
+  Session,
+  GoneException,
+  HttpCode,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto, UpdateUserStatusDto } from './dto/update-user.dto';
-import type { Response } from 'express';
+import type { Request, Response } from 'express';
 import { ResponseMsgEnum } from '@/helper/enums';
 import { FindUserDto } from './dto/find-user-dto';
 import { IdsDto } from '@/common/dto';
 import { RolesService } from '../roles/roles.service';
 import { ErrorMsg } from '@/helper/err.message.enums';
+import { ValidateCaptchaDto } from './dto/captcha.dto';
 @Controller('users')
 export class UserController {
   constructor(
     private readonly userService: UserService,
     private readonly rolesService: RolesService,
-  ) {}
+  ) { }
+
+  @Get('/captcha')
+  @Header('Content-Type', 'image/svg')
+  public async getCaptcha(@Session() session: Record<string, any>) {
+    const { text, data } = this.userService.generateCaptcha()
+    session.code = text
+    // 设置验证码的生效时间
+
+    // 方案2 在生成验证码时记录一个时间戳 校验时对比2个时间戳
+    session.renderTimeStamp = Date.now()
+    return data
+  }
+
+  @Post('/captcha')
+  @HttpCode(200)
+  public async validateCaptcha(
+    @Res({ passthrough: true }) res: Response,
+    @Body() { code }: ValidateCaptchaDto, @Session() session: Record<string, any>) {
+    // console.log('session ----->', session)
+    const isExpire = this.userService.captchaIsExpire(session.renderTimeStamp)
+    // if (isExpire) throw new GoneException('验证码已过期')
+    if (isExpire) {
+      res.resMsg = ResponseMsgEnum.FALSE
+      return '验证码已过期'
+    }
+    const isPass = this.userService.captchaIsValidataPass(session.code, code)
+    if (!isPass) {
+      res.resMsg = ResponseMsgEnum.FALSE
+      return '验证码有误'
+    }
+    return '验证码校验成功!'
+
+  }
+
 
   @Get()
   @Header('Cache-Control', 'max-age=5')
   public async findAll(
     @Res({ passthrough: true }) res: Response,
+    @Req() req: Request,
     @Query() query: FindUserDto,
   ) {
+    // req.session
     const { list, total } = await this.userService.findAll(query);
     return { list, total };
   }

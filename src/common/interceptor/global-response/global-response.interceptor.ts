@@ -14,6 +14,8 @@ export class GlobalResponseInterceptor implements NestInterceptor {
       map((data) => {
         const response = context.switchToHttp().getResponse<Response>();
         response.removeHeader('X-Powered-By');
+        // 当设置了响应头时 返回原始数据
+        if (response.getHeader('Content-Type')) return data
         return {
           code: response.statusCode,
           message: response.resMsg ?? 'Success',
