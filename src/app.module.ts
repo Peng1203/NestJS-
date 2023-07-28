@@ -26,6 +26,7 @@ import { ResourceModule } from './modules/resource/resource.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { MulterConfigService } from './config/multer.config.service';
 import { HttpToHttpsMiddleware } from './common/middleware/http.to.https/http.to.https.middleware';
+import { SSEModule } from './modules/sse/sse.module';
 
 @Module({
   imports: [
@@ -66,6 +67,7 @@ import { HttpToHttpsMiddleware } from './common/middleware/http.to.https/http.to
     JobsModule,
     QueneModule,
     ResourceModule,
+    SSEModule
   ],
   controllers: [AppController],
   providers: [

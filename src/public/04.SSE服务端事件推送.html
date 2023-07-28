@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>服务器事件推送</title>
+</head>
+
+<body>
+  <div id="log"></div>
+
+  <script>
+
+    // const eventSource = new EventSource("http://localhost:3000/sse");
+    // eventSource.onmessage = (e) => {
+    //   console.log(' ----->', e)
+    // }
+
+    const ev = new EventSource('http://localhost:3000/sse/stream')
+    ev.onmessage = (e) => {
+      log.innerText += e.data + '\n'
+    }
+
+    ev.onerror = (e) => {
+      if (!e) {
+        ev.close()
+      }
+    }
+
+  </script>
+</body>
+
+</html>

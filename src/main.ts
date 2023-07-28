@@ -57,10 +57,15 @@ async function bootstrap() {
   // 开启 gzip 压缩
   app.use(compression());
   // 开启跨域
-  app.enableCors({
+  /**
+   * 
+  {
     origin: 'http://127.0.0.1:5500',
     credentials: true
-  });
+  }
+   */
+  app.enableCors();
+
   // 接口预设 路径
   app.setGlobalPrefix(PREFIX);
   // 注册全局响应拦截器
