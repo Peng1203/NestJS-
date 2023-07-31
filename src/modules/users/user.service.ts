@@ -122,4 +122,10 @@ export class UserService {
     // 不区分大小写
     return renderCaptcha.toLocaleLowerCase() === validCaptcha.toLocaleLowerCase()
   }
+
+  async matchUserAndPwd(user: { userName: string, password: string }) {
+    return await this.userRepository.findOne({
+      where: { ...user }
+    })
+  }
 }

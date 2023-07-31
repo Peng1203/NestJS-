@@ -30,6 +30,9 @@ export class User {
   @Column({ name: 'user_name', type: 'varchar', length: 255 })
   readonly userName: string;
 
+  @Column({ type: 'varchar', length: 60, default: '123456' })
+  readonly password: string;
+
   @ManyToOne(() => Role, (role) => role.id)
   @JoinColumn()
   readonly role: Role;

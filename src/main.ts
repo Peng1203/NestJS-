@@ -11,10 +11,14 @@ import { AllExceptionFilter } from './common/exceptions/all-exception/all-except
 import fs from 'fs';
 import path from 'path';
 import express from 'express';
-import { ExpressAdapter, NestExpressApplication } from '@nestjs/platform-express';
+import {
+  ExpressAdapter,
+  NestExpressApplication,
+} from '@nestjs/platform-express';
 import http from 'http';
 import https from 'https';
 import session from 'express-session';
+import { VerifyTokenGuard } from './modules/auth/auth.guard';
 
 // NODE_ENV 变量 是通过 命令行设置的
 dotenv.config({
@@ -36,7 +40,10 @@ async function bootstrap() {
   // 异步加载AppModule 等待上面 env 配置文件 加载完成
   const server = express();
   const { AppModule } = await import('./app.module');
-  const app = await NestFactory.create<NestExpressApplication>(AppModule, new ExpressAdapter(server));
+  const app = await NestFactory.create<NestExpressApplication>(
+    AppModule,
+    new ExpressAdapter(server),
+  );
   // const app = await NestFactory.create(AppModule, {
   //   logger: ['error'],
   //   httpsOptions,
@@ -78,7 +85,8 @@ async function bootstrap() {
   app.useGlobalFilters(new DataAccessFilter());
   // 注册全局DTO层校验管道
   app.useGlobalPipes(new DtoValidatePipe());
-
+  // 注册全局token校验守卫
+  // app.useGlobalGuards(new VerifyTokenGuard());
   // ctrl + c 强制关闭进程时 会触发该通知 便于触发 应用程序关闭的生命周期函数
   // process.on('SIGINT', async () => await app.close());
   // await app.listen(PORT || 3000, () => {

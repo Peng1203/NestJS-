@@ -27,6 +27,9 @@ import { MulterModule } from '@nestjs/platform-express';
 import { MulterConfigService } from './config/multer.config.service';
 import { HttpToHttpsMiddleware } from './common/middleware/http.to.https/http.to.https.middleware';
 import { SSEModule } from './modules/sse/sse.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { APP_GUARD } from '@nestjs/core';
+import { VerifyTokenGuard } from './modules/auth/auth.guard';
 
 @Module({
   imports: [
@@ -67,7 +70,8 @@ import { SSEModule } from './modules/sse/sse.module';
     JobsModule,
     QueneModule,
     ResourceModule,
-    SSEModule
+    SSEModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [
@@ -79,10 +83,14 @@ import { SSEModule } from './modules/sse/sse.module';
     //   provide: APP_INTERCEPTOR,
     //   useClass: GlobalResponseInterceptor,
     // },
+    {
+      provide: APP_GUARD,
+      useClass: VerifyTokenGuard,
+    },
   ],
 })
 export class AppModule implements NestModule, OnModuleInit, OnModuleDestroy {
-  constructor(private dataSource: DataSource) { }
+  constructor(private dataSource: DataSource) {}
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(LoggerMiddleware, HttpToHttpsMiddleware)
