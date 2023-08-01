@@ -38,7 +38,7 @@ export class DataAccessFilter implements ExceptionFilter {
         reason = '必需的字段缺少值。';
         break;
     }
-
+    // 写入错误的logger日志
     console.log(
       ' exception.message  ----->',
       exception.message ? `${exception.message}，${reason}` : reason,

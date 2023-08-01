@@ -17,6 +17,7 @@ import {
   GoneException,
   HttpCode,
   UseGuards,
+  HttpStatus,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -31,6 +32,7 @@ import { ValidateCaptchaDto } from './dto/captcha.dto';
 import { Public } from '@/common/decorators/public.decorator';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { RolesGuard } from '@/common/guards/roles.guard';
+import { pwdEncryption } from '@/utils/pwd.util';
 @Controller('users')
 export class UserController {
   constructor(
@@ -51,7 +53,7 @@ export class UserController {
   }
 
   @Post('/captcha')
-  @HttpCode(200)
+  @HttpCode(HttpStatus.OK)
   public async validateCaptcha(
     @Res({ passthrough: true }) res: Response,
     @Body() { code }: ValidateCaptchaDto,
@@ -88,11 +90,13 @@ export class UserController {
   @Post()
   @Roles(RoleEnum.Admin)
   @UseGuards(RolesGuard)
-  async create(@Body() createUserDto: CreateUserDto) {
-    const isExist = await this.rolesService.roleIsExist(createUserDto.role);
+  async create(@Body() data: CreateUserDto) {
+    const isExist = await this.rolesService.roleIsExist(data.role);
     if (!isExist) throw new NotFoundException(ErrorMsg.RoleNotFound);
-
-    return this.userService.create(createUserDto);
+    return this.userService.create({
+      ...data,
+      password: pwdEncryption(data.password),
+    });
   }
 
   @Get(':id')

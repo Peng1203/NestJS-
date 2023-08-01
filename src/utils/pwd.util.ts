@@ -1,22 +1,18 @@
 import { PWD_SECRET } from '@/config/sign';
 import crypto from 'crypto';
 
-export function pwdEncryption(originPwd: string, secret: string): String {
+export function pwdEncryption(
+  originPwd: string,
+  secret: string = PWD_SECRET,
+): string {
   // 创建一个随机的盐值
-  const salt = crypto.randomBytes(16).toString('hex');
-  const hash = crypto.createHash('md5');
-  const val = hash.update(originPwd);
-  console.log('val ----->', val);
-  // crypto.pbkdf2(originPwd, salt, 100000, 64, 'sha512', (err, derivedKey) => {
-  //   if (err) throw err;
+  // const salt = crypto.randomBytes(16).toString('hex');
+  // const hash = crypto.createHash('md5');
+  // hash.update(originPwd);
+  // const val = hash.digest('hex');
 
-  //   const hashedPassword = derivedKey.toString('hex');
-  //   // console.log('Salt:', salt);
-  //   console.log('Hashed Password:', hashedPassword);
-  // });
-  return '';
+  // const hash = crypto.createHmac('md5', secret);
+  const hash = crypto.createHmac('sha256', secret);
+  hash.update(originPwd);
+  return hash.digest('hex');
 }
-
-pwdEncryption('123456', PWD_SECRET);
-pwdEncryption('1234561', PWD_SECRET);
-pwdEncryption('123456', PWD_SECRET);

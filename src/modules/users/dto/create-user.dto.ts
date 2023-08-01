@@ -24,6 +24,12 @@ export class CreateUserDto {
   @IsDefined()
   readonly role: number | any;
 
+  @IsString()
+  @MinLength(8)
+  @IsNotEmpty()
+  @IsDefined()
+  readonly password: string;
+
   @IsNumber()
   @IsInt()
   @IsIn([0, 1])
