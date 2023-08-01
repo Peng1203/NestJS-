@@ -43,3 +43,8 @@ export enum ApplicationTypes {
   ZIP = 'application/zip',
   '7Z' = 'application/x-7z-compressed',
 }
+
+export enum RoleEnum {
+  User = 'user',
+  Admin = 'admin',
+}

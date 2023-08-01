@@ -15,7 +15,7 @@ export class CreateUserDto {
   @IsNotEmpty()
   @IsDefined()
   @MinLength(2)
-  @MaxLength(8)
+  @MaxLength(12)
   readonly userName: string;
 
   @IsNumber()
