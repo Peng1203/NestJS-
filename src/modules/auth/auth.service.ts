@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UserLoginDto } from './dto/user-login.dto';
 import { UserService } from '../users/user.service';
 import { JwtService } from '@nestjs/jwt';
+import { jwtConstants } from './constants';
 
 @Injectable()
 export class AuthService {
@@ -10,24 +11,37 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
   async signIn({ userName, password }: UserLoginDto) {
-    const matchRes = await this.userService.matchUserAndPwd({
+    const user = await this.userService.matchUserAndPwd({
       userName,
       password,
     });
-    if (!matchRes) throw new UnauthorizedException('账号或密码错误');
-    const token = await this.jwtService.signAsync({
-      userName,
-      secret: '114514',
-    });
+    if (!user) throw new UnauthorizedException('账号或密码错误');
+    const token = await this.generateToken(user.id, userName);
     return {
       token,
     };
   }
 
-  async generateGwt(userName) {
-    this.jwtService.sign({
-      id: userName,
-    });
+  // 生成token
+  async generateToken(id: number, userName: string) {
+    return `Bearer ${await this.jwtService.signAsync({
+      sub: id,
+      userName,
+    })}`;
+  }
+
+  // 验证token
+  async verifyToken(
+    token: string,
+  ): Promise<boolean | { userName: string; id: number }> {
+    try {
+      const { sub, userName } = await this.jwtService.verifyAsync(token, {
+        secret: jwtConstants.secret,
+      });
+      return { id: sub, userName };
+    } catch (e) {
+      return false;
+    }
   }
 
   findAll() {

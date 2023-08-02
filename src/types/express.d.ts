@@ -1,4 +1,4 @@
-import type {
+import {
   Request as ExpressRequest,
   Response as ExpressResponse,
 } from 'express';

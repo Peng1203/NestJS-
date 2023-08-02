@@ -7,7 +7,7 @@ import {
   InternalServerErrorException,
   HttpException,
 } from '@nestjs/common';
-import type { Request, Response } from 'express';
+import { Request, Response } from 'express';
 import { QueryFailedError } from 'typeorm';
 // 处理 TypeORM 抛出错误
 @Catch(InternalServerErrorException)

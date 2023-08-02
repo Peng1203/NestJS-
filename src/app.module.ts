@@ -25,11 +25,11 @@ import { QueneModule } from './modules/quene/quene.module';
 import { ResourceModule } from './modules/resource/resource.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { MulterConfigService } from './config/multer.config.service';
-import { HttpToHttpsMiddleware } from './common/middleware/http.to.https/http.to.https.middleware';
 import { SSEModule } from './modules/sse/sse.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
-import { VerifyTokenGuard } from './modules/auth/auth.guard';
+import { VerifyTokenGuard } from './common/guards/auth.guard';
+import { EncryptPwdMiddleware } from './common/middleware/encrypt-pwd/encrypt-pwd.middleware';
 
 @Module({
   imports: [
@@ -93,8 +93,11 @@ export class AppModule implements NestModule, OnModuleInit, OnModuleDestroy {
   constructor(private dataSource: DataSource) {}
   configure(consumer: MiddlewareConsumer) {
     consumer
-      .apply(LoggerMiddleware, HttpToHttpsMiddleware)
+      .apply(LoggerMiddleware)
       .forRoutes({ path: '*', method: RequestMethod.ALL });
+
+    // 密码加密中间件
+    consumer.apply(EncryptPwdMiddleware).forRoutes('auth');
   }
 
   onModuleInit() {

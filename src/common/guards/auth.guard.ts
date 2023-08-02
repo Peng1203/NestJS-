@@ -5,17 +5,22 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { jwtConstants } from './constants';
+import { jwtConstants } from '../../modules/auth/constants';
 import { Request } from 'express';
 import { IS_PUBLIC_KEY } from '@/common/decorators/public.decorator';
 import { Reflector } from '@nestjs/core';
+import { AuthGuard } from '@nestjs/passport';
+import { AuthService } from '@/modules/auth/auth.service';
 
 @Injectable()
-export class VerifyTokenGuard implements CanActivate {
+export class VerifyTokenGuard extends AuthGuard('jwt') {
   constructor(
-    private readonly jwtService: JwtService,
     private readonly reflector: Reflector,
-  ) {}
+    private readonly jwtService: JwtService,
+    private readonly authService: AuthService,
+  ) {
+    super();
+  }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
@@ -25,21 +30,19 @@ export class VerifyTokenGuard implements CanActivate {
     // 跳过 自定义Public装饰器 修饰过的 请求
     if (isPublic) return true;
 
-    const request = context.switchToHttp().getRequest();
-    const token = this.extractToken(request);
-    if (!token) throw new UnauthorizedException();
+    const req = context.switchToHttp().getRequest();
+    const token = this.extractToken(req);
 
-    try {
-      const payload = await this.jwtService.verifyAsync(token, {
-        secret: jwtConstants.secret,
-      });
-      console.log('payload ----->', payload);
-      // 💡 We're assigning the payload to the request object here
-      // so that we can access it in our route handlers
-      request['user'] = { ...payload, roles: ['admin'] };
-    } catch {
-      throw new UnauthorizedException('token已失效请重新认证');
-    }
+    console.log('token ----->', token);
+    if (!token) throw new UnauthorizedException('Token cannot be empty');
+
+    const payload = await this.authService.verifyToken(token);
+    if (!payload)
+      throw new UnauthorizedException('登录信息已过期，请重新登录！');
+
+    // 挂在 user 对象
+    // req['user'] = { ...payload, roles: ['admin'] };
+
     return true;
   }
 
@@ -51,8 +54,8 @@ export class VerifyTokenGuard implements CanActivate {
       req.headers['token'] ||
       req.body['token'] ||
       req.query['token'] ||
-      undefined
-    );
+      ''
+    ).replaceAll('Bearer ', '');
     // const [type, token] = req.headers.authorization?.split(' ') ?? [];
     // console.log('type ----->', type, token);
     // return type === 'Bearer' ? token : undefined;

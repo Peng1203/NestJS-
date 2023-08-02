@@ -18,7 +18,7 @@ import {
 import http from 'http';
 import https from 'https';
 import session from 'express-session';
-import { VerifyTokenGuard } from './modules/auth/auth.guard';
+import { VerifyTokenGuard } from './common/guards/auth.guard';
 
 // NODE_ENV 变量 是通过 命令行设置的
 dotenv.config({
@@ -96,7 +96,7 @@ async function bootstrap() {
   // });
 
   await app.init();
-  http.createServer(server).listen(3000);
+  http.createServer(server).listen(3000, process.env.HOST_NAME);
   https.createServer(httpsOptions, server).listen(3010);
 }
 bootstrap();

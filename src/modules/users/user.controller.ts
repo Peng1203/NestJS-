@@ -22,7 +22,7 @@ import {
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto, UpdateUserStatusDto } from './dto/update-user.dto';
-import type { Request, Response } from 'express';
+import { Request, Response } from 'express';
 import { ResponseMsgEnum, RoleEnum } from '@/helper/enums';
 import { FindUserDto } from './dto/find-user-dto';
 import { IdsDto } from '@/common/dto';
@@ -42,9 +42,15 @@ export class UserController {
 
   @Get('/captcha')
   @Header('Content-Type', 'image/svg')
-  public async getCaptcha(@Session() session: Record<string, any>) {
+  public async getCaptcha(
+    @Session() session: Record<string, any>,
+    @Req() req: Request,
+  ) {
     const { text, data } = this.userService.generateCaptcha();
     session.code = text;
+    console.log(' ----->', req.hostname);
+    console.log('获取验证码 user ----->', req.user);
+
     // 设置验证码的生效时间
 
     // 方案2 在生成验证码时记录一个时间戳 校验时对比2个时间戳
@@ -58,7 +64,9 @@ export class UserController {
     @Res({ passthrough: true }) res: Response,
     @Body() { code }: ValidateCaptchaDto,
     @Session() session: Record<string, any>,
+    @Req() req: Request,
   ) {
+    console.log('校验验证码 user ----->', req.user);
     // console.log('session ----->', session)
     const isExpire = this.userService.captchaIsExpire(session.renderTimeStamp);
     // if (isExpire) throw new GoneException('验证码已过期')
@@ -82,6 +90,7 @@ export class UserController {
     @Req() req: Request,
     @Query() query: FindUserDto,
   ) {
+    console.log('查询全部用户 ----->', req.user);
     // req.session
     const { list, total } = await this.userService.findAll(query);
     return { list, total };

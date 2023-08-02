@@ -5,7 +5,7 @@ import {
   NestInterceptor,
 } from '@nestjs/common';
 import { Observable, map } from 'rxjs';
-import type { Response } from 'express';
+import { Response } from 'express';
 
 @Injectable()
 export class GlobalResponseInterceptor implements NestInterceptor {
@@ -15,7 +15,7 @@ export class GlobalResponseInterceptor implements NestInterceptor {
         const response = context.switchToHttp().getResponse<Response>();
         response.removeHeader('X-Powered-By');
         // 当设置了响应头时 返回原始数据
-        if (response.getHeader('Content-Type')) return data
+        if (response.getHeader('Content-Type')) return data;
         return {
           code: response.statusCode,
           message: response.resMsg ?? 'Success',
