@@ -18,7 +18,6 @@ import {
 import http from 'http';
 import https from 'https';
 import session from 'express-session';
-import { VerifyTokenGuard } from './common/guards/auth.guard';
 
 // NODE_ENV 变量 是通过 命令行设置的
 dotenv.config({

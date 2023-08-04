@@ -17,7 +17,6 @@ import { UserLoginDto } from './dto/user-login.dto';
 import { UserService } from '../users/user.service';
 import { Request, Response } from 'express';
 import { ResponseMsgEnum } from '@/helper/enums';
-import { VerifyTokenGuard } from '../../common/guards/auth.guard';
 import { Public } from '@/common/decorators/public.decorator';
 import { AuthGuard } from '@nestjs/passport';
 import { LocalAuthGuard } from '@/common/guards/local-auth.guard';
@@ -43,9 +42,11 @@ export class AuthController {
     return info;
   }
 
-  @UseGuards(VerifyTokenGuard)
+  // @UseGuards(VerifyTokenGuard)
   @Get()
-  findAll() {
+  @UseGuards(AuthGuard('jwt'))
+  findAll(@Req() req) {
+    console.log('req.user ----->', req.user);
     return this.authService.findAll();
   }
 

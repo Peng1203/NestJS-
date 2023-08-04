@@ -28,7 +28,7 @@ import { MulterConfigService } from './config/multer.config.service';
 import { SSEModule } from './modules/sse/sse.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
-import { VerifyTokenGuard } from './common/guards/auth.guard';
+import { JwtAuthGuard } from './common/guards/auth.guard';
 import { EncryptPwdMiddleware } from './common/middleware/encrypt-pwd/encrypt-pwd.middleware';
 
 @Module({
@@ -85,7 +85,7 @@ import { EncryptPwdMiddleware } from './common/middleware/encrypt-pwd/encrypt-pw
     // },
     {
       provide: APP_GUARD,
-      useClass: VerifyTokenGuard,
+      useClass: JwtAuthGuard,
     },
   ],
 })

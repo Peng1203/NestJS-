@@ -12,8 +12,11 @@ import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from '@/modules/auth/auth.service';
 
+/**
+ * 用于扩展 Passport JWT策略 会在 JwtStrategy 之前执行 canActivate 函数如果返回 false 或者抛出错误 则不会执行 JwtStrategy 策略 可以
+ */
 @Injectable()
-export class VerifyTokenGuard extends AuthGuard('jwt') {
+export class JwtAuthGuard extends AuthGuard('jwt') {
   constructor(
     private readonly reflector: Reflector,
     private readonly jwtService: JwtService,
@@ -36,9 +39,9 @@ export class VerifyTokenGuard extends AuthGuard('jwt') {
     console.log('token ----->', token);
     if (!token) throw new UnauthorizedException('Token cannot be empty');
 
-    const payload = await this.authService.verifyToken(token);
-    if (!payload)
-      throw new UnauthorizedException('登录信息已过期，请重新登录！');
+    // const payload = await this.authService.verifyToken(token);
+    // if (!payload)
+    //   throw new UnauthorizedException('登录信息已过期，请重新登录！');
 
     // 挂在 user 对象
     // req['user'] = { ...payload, roles: ['admin'] };

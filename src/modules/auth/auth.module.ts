@@ -11,7 +11,8 @@ import { JwtStrategy } from './jwt.strategy';
 @Module({
   imports: [
     UsersModule,
-    PassportModule,
+    // PassportModule,
+    PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       global: true,
       secret: jwtConstants.secret,
@@ -24,5 +25,6 @@ import { JwtStrategy } from './jwt.strategy';
   ],
   controllers: [AuthController],
   providers: [AuthService, LocalStrategy, JwtStrategy],
+  exports: [AuthService],
 })
 export class AuthModule {}
