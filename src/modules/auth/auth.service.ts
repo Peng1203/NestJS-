@@ -24,7 +24,7 @@ export class AuthService {
 
   // 生成token
   async generateToken(id: number, userName: string) {
-    return `Bearer ${await this.jwtService.signAsync({
+    return `${await this.jwtService.signAsync({
       sub: id,
       userName,
     })}`;

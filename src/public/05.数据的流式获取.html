@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>数据的流式获取</title>
+  <script src="../../node_modules/axios/dist/axios.min.js"></script>
+</head>
+
+<body>
+  <div style="width: 200px; height: 300px;overflow-y: scroll;" id="con"></div>
+  <button onclick="getData(event)">get</button>
+  <button onclick="getData2(event)">get2</button>
+  <script>
+
+    async function getData2() {
+      const res = await axios({
+        url: 'http://127.0.0.1:3000/text',
+        method: 'get',
+      })
+      console.log('res ----->', res, res.data.body)
+
+    }
+
+    async function getData(e) {
+      const resp = await fetch('http://127.0.0.1:3000/text', {
+        method: 'GET'
+      })
+      const reader = resp.body.getReader()
+      while (true) {
+        const { value, done } = await reader.read()
+        if (done) break
+        // console.log('value ----->', done, value)
+        const res = value.toString()
+        const blob = new Blob([value]);
+        const text = await blob.text();
+        document.getElementById('con').innerHTML += text
+        // console.log('text ----->', text)
+      }
+    } 
+  </script>
+</body>
+
+</html>

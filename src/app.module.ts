@@ -30,6 +30,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './common/guards/auth.guard';
 import { EncryptPwdMiddleware } from './common/middleware/encrypt-pwd/encrypt-pwd.middleware';
+import { ChatGptModule } from './modules/chat-gpt/chat-gpt.module';
 
 @Module({
   imports: [
@@ -72,6 +73,7 @@ import { EncryptPwdMiddleware } from './common/middleware/encrypt-pwd/encrypt-pw
     ResourceModule,
     SSEModule,
     AuthModule,
+    ChatGptModule,
   ],
   controllers: [AppController],
   providers: [

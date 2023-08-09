@@ -1,21 +1,23 @@
 import { Module } from '@nestjs/common';
 import { ResourceService } from './resource.service';
 import { ResourceController } from './resource.controller';
-import { HttpModule } from '@nestjs/axios';
-import { HttpConfigService } from '@/config/http.config.service';
+import { CommonModule } from '@/shared/common.module';
+// import { HttpModule } from '@nestjs/axios';
+// import { HttpConfigService } from '@/config/http.config.service';
 
 @Module({
   imports: [
+    CommonModule,
     // 注册HTTP服务客户端
     // HttpModule,
     // HttpModule.register({}),
     // HttpModule.registerAsync({}),
-    HttpModule.registerAsync({
-      // 工程函数注册
-      // useFactory: () => ({}),
-      useClass: HttpConfigService,
-      // useExisting: ConfigService,
-    }),
+    // HttpModule.registerAsync({
+    //   // 工程函数注册
+    //   // useFactory: () => ({}),
+    //   useClass: HttpConfigService,
+    //   // useExisting: ConfigService,
+    // }),
   ],
   controllers: [ResourceController],
   providers: [ResourceService],
