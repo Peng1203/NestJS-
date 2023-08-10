@@ -1,26 +1,47 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Header,
+  Post,
+  Query,
+  Res,
+} from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { Observable, map } from 'rxjs';
 import { Public } from '@/common/decorators/public.decorator';
 import { proxyHttp } from '@/utils/request';
 import { SendMsgDto } from './dto/send-msg.dto';
+import { Stream } from 'stream';
 
 @Controller('chat-gpt')
 export class ChatGptController {
   constructor(private readonly httpService: HttpService) {}
   @Get()
   @Public()
-  async ChatGPTRes(@Body() data: SendMsgDto): Promise<any> {
-    const { data: res } = await proxyHttp.post('/chat/completions', {
-      model: 'gpt-3.5-turbo',
-      messages: [{ role: 'user', content: data.str }],
-      max_tokens: 1000,
-      temperature: 0.8,
-    });
-
-    console.log('res ----->', res);
-
-    return res.choices;
+  @Header('Content-Type', 'text/event-stream')
+  async ChatGPTRes(
+    @Res() res: Response,
+    @Query() data: SendMsgDto,
+  ): Promise<any> {
+    // proxyHttp({
+    //   // baseURL,
+    //   responseType: 'stream',
+    // });
+    const { data: response } = await proxyHttp.post<Stream>(
+      '/chat/completions',
+      {
+        model: 'gpt-3.5-turbo',
+        messages: [{ role: 'user', content: data.str }],
+        // max_tokens: 20,
+        max_tokens: 1000,
+        temperature: 0.8,
+        stream: true,
+      },
+      { responseType: 'stream' },
+    );
+    // console.log('res ----->', res);
+    response.pipe(res as any);
   }
 
   // @Get()

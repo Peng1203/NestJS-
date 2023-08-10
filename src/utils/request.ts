@@ -7,7 +7,6 @@ const agent = tunnel.httpsOverHttp({
     port: 15732,
   },
 });
-console.log('process.env.OPENAI_API_KEY ----->', process.env.OPENAI_API_KEY);
 export const proxyHttp = axios.create({
   baseURL: 'https://api.openai.com/v1',
   headers: {
