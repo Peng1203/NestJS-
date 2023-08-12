@@ -13,11 +13,19 @@
   <input type="text" id="input"><button onclick="handleSend()">发 送</button>
 
   <h3>
-    <p id="content-con" style="overflow: scroll; width: 300px;transition: 1s;"></p>
+    <p id="content-con" style="overflow: scroll; width: 400px;height: 400px;"></p>
   </h3>
 
   <script>
     const inputDom = document.getElementById('input')
+
+    function getSSE() {
+      const eventSource = new EventSource('https://127.0.0.1:3010/chat-gpt/sse');
+      eventSource.onmessage = ({ data }) => {
+        console.log('New message', JSON.parse(data));
+      };
+
+    }
 
     function handleSend() {
       send(inputDom.value)
@@ -42,8 +50,9 @@
         const res = JSON.parse(e.data)
         // console.log('res ----->', res, res.choices)
         const { content = '' } = res.choices[0].delta
-        console.log('content ----->', content)
+        // console.log('content ----->', content)
         contDom.innerHTML += content
+        contDom.scrollTop = contDom.scrollHeight;
         // res.choices.forEach(item => (item.delta
         //   .content) && (contDom.innerHTML += item.delta
         //     .content))

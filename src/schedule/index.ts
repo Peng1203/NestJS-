@@ -20,7 +20,7 @@ export class TasksService {
     name: 'notifications',
   })
   testCron() {
-    console.log(' 测试 定时任务触发  !!! ----->');
+    // console.log(' 测试 定时任务触发  !!! ----->');
   }
 
   // @Cron('* * * * * *', { name: 'testTask2' })

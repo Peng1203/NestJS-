@@ -61,8 +61,8 @@ async function bootstrap() {
     }),
   );
 
-  // 开启 gzip 压缩
-  app.use(compression());
+  // 开启 gzip 压缩 开启gzip压缩之后 sse 响应会被压缩成一块返回
+  // app.use(compression());
   // 开启跨域
   /**
    * 
